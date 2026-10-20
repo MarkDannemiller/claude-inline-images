@@ -1,0 +1,11 @@
+{
+  "name": "inline-images",
+  "version": "0.2.0",
+  "description": "Draws images inline in the Claude Code transcript (Read results, MCP screenshots, pasted images) on kitty-graphics terminals like Ghostty",
+  "types": "./types/index.d.ts",
+  "license": "MIT",
+  "author": {
+    "name": "Mark Dannemiller"
+  },
+  "repository": "https://github.com/MarkDannemiller/claude-inline-images"
+}

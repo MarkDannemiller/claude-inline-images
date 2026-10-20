@@ -1,0 +1,5 @@
+{
+  "name": "claude-inline-images",
+  "owner": { "name": "Mark Dannemiller" },
+  "plugins": [{ "name": "inline-images", "source": "./" }]
+}
