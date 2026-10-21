@@ -31,9 +31,11 @@ claude plugin install inline-images --marketplace MarkDannemiller/claude-inline-
 
 ## Requirements and limits
 
-- macOS: images are converted to PNG with the built-in `base64` and `sips`
-  tools, into `/tmp/claude-inline-images/`. Images larger than 1600 px are
-  shrunk; smaller ones are left as they are.
+- Images are converted to PNG into `/tmp/claude-inline-images/`. Images larger
+  than 1600 px are shrunk; smaller ones are left as they are.
+  - macOS: uses the built-in `base64` and `sips` tools.
+  - Linux and elsewhere: uses ImageMagick (`magick`) if installed, otherwise
+    Python 3 with Pillow (`pip install pillow`).
 - A terminal with the kitty graphics protocol and local file transfer
   (Ghostty, kitty). tmux does not pass the protocol through.
 - Pasted images show for prompts sent while the mod is loaded; tool and `Read`

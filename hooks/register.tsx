@@ -50,17 +50,42 @@ function imagesIn(value: unknown, depth = 0): Encoded[] {
 // what is larger than MAX_PIXELS; prints the PNG's width and height.
 const CONVERT = `
 set -e
-base64 -D -i "$1" -o "$2"
-sips -s format png "$2" --out "$3" >/dev/null
-rm -f "$1" "$2"
-w=$(sips -g pixelWidth "$3" | awk '/pixelWidth/ {print $2}')
-h=$(sips -g pixelHeight "$3" | awk '/pixelHeight/ {print $2}')
-if [ "$w" -gt "$4" ] || [ "$h" -gt "$4" ]; then
-  sips -Z "$4" "$3" >/dev/null
+if command -v sips >/dev/null 2>&1; then
+  base64 -D -i "$1" -o "$2"
+  sips -s format png "$2" --out "$3" >/dev/null
+  rm -f "$1" "$2"
   w=$(sips -g pixelWidth "$3" | awk '/pixelWidth/ {print $2}')
   h=$(sips -g pixelHeight "$3" | awk '/pixelHeight/ {print $2}')
+  if [ "$w" -gt "$4" ] || [ "$h" -gt "$4" ]; then
+    sips -Z "$4" "$3" >/dev/null
+    w=$(sips -g pixelWidth "$3" | awk '/pixelWidth/ {print $2}')
+    h=$(sips -g pixelHeight "$3" | awk '/pixelHeight/ {print $2}')
+  fi
+  echo "$w $h"
+  exit 0
 fi
-echo "$w $h"
+
+# Linux and elsewhere: ImageMagick if present, else Python's Pillow.
+base64 -d "$1" > "$2"
+rm -f "$1"
+if command -v magick >/dev/null 2>&1; then
+  magick "$2[0]" -resize "$4x$4>" "png:$3"
+  rm -f "$2"
+  magick identify -format '%w %h' "$3"
+  echo
+else
+  python3 -I - "$2" "$3" "$4" <<'PY'
+import os, sys
+from PIL import Image
+src, dst, limit = sys.argv[1], sys.argv[2], int(sys.argv[3])
+with Image.open(src) as im:
+    im = im.convert('RGBA') if im.mode not in ('RGB', 'RGBA') else im.copy()
+im.thumbnail((limit, limit))
+im.save(dst, 'PNG')
+os.remove(src)
+print(im.width, im.height)
+PY
+fi
 `
 
 function toPicture($: $, key: string, image: Encoded): Promise<Picture | undefined> {
